@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>シンプルGDMTスコア</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 10px;
+      background: #f9f9f9;
+      color: #333;
+    }
+    h2, h3 {
+      cursor: pointer;
+    }
+    .section {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 10px 15px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+    }
+    .info {
+      display: none;
+      font-size: 0.9em;
+      color: #555;
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+    label {
+      display: block;
+      margin: 5px 0;
+      cursor: pointer;
+    }
+    #totalScore {
+      font-weight: bold;
+      color: #006400;
+      font-size: 1.5em;
+    }
+    progress {
+      width: 100%;
+      height: 20px;
+      margin-top: 10px;
+    }
+    ul#scoreDetails {
+      list-style: none;
+      padding: 0;
+      margin-top: 15px;
+    }
+    ul#scoreDetails li {
+      padding: 4px 0;
+    }
+    #alertBox {
+      margin-top: 15px;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 6px;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .warning {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>シンプルGDMTスコア</h2>
+
+  <form id="scoreForm">
+
+    <div class="section">
+      <h3 onclick="toggleInfo(this)">RAS阻害薬</h3>
+      <div class="info">1日最大量:エナラプリル/リシノプリル10mg、カンデサルタン8mg</div>
+      <label><input type="radio" name="ras" value="0">なし</label>
+      <label><input type="radio" name="ras" value="1">&lt;50%最大量 ACE阻害薬/ARB</label>
+      <label><input type="radio" name="ras" value="2">≧50%最大量 ACE阻害薬/ARB</label>
+      <label><input type="radio" name="ras" value="3">ARNI（用量問わず）</label>
+    </div>
+
+    <div class="section">
+      <h3 onclick="toggleInfo(this)">β遮断薬</h3>
+      <div class="info"> 1日最大量: カルベジロール20mg、ビソプロロール5mg</div>
+      <label><input type="radio" name="beta" value="0">なし</label>
+      <label><input type="radio" name="beta" value="1">&lt;50%最大量</label>
+      <label><input type="radio" name="beta" value="2">≧50%最大量</label>
+    </div>
+
+    <div class="section">
+      <h3 onclick="toggleInfo(this)">MRA</h3>
+      <div class="info"> 1日最大量: エプレレノン50mg、スピロノラクトン100mg</div>
+      <label><input type="checkbox" name="mra" value="2">使用あり</label>
+    </div>
+
+    <div class="section">
+      <h3 onclick="toggleInfo(this)">SGLT2阻害薬</h3>
+      <div class="info"> 1日最大量: エンパグリフロジン/ダパグリフロジン10mg</div>
+      <label><input type="checkbox" name="sglt2" value="2">使用あり</label>
+    </div>
+
+  </form>
+
+  <div class="section">
+    <h3>合計点: <span id="totalScore">0</span> / 9</h3>
+    <progress id="scoreBar" value="0" max="9"></progress>
+
+    <ul id="scoreDetails">
+      <li>RAS阻害薬: <span id="rasScore">0</span> 点</li>
+      <li>β遮断薬: <span id="betaScore">0</span> 点</li>
+      <li>MRA: <span id="mraScore">0</span> 点</li>
+      <li>SGLT2阻害薬: <span id="sglt2Score">0</span> 点</li>
+    </ul>
+
+    <div id="alertBox" class="warning">
+     HFrEF、HFmrEFでは4剤達成出来なくても5点以上を目指せるとGOOD
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("scoreForm");
+    const totalDisplay = document.getElementById("totalScore");
+    const scoreBar = document.getElementById("scoreBar");
+
+    const rasScoreEl = document.getElementById("rasScore");
+    const betaScoreEl = document.getElementById("betaScore");
+    const mraScoreEl = document.getElementById("mraScore");
+    const sglt2ScoreEl = document.getElementById("sglt2Score");
+
+    const alertBox = document.getElementById("alertBox");
+
+    form.addEventListener("change", () => {
+      const ras = form.elements["ras"].value || 0;
+      const beta = form.elements["beta"].value || 0;
+      const mra = form.elements["mra"].checked ? 2 : 0;
+      const sglt2 = form.elements["sglt2"].checked ? 2 : 0;
+
+      const total = parseInt(ras) + parseInt(beta) + mra + sglt2;
+
+      totalDisplay.textContent = total;
+      scoreBar.value = total;
+
+      rasScoreEl.textContent = ras;
+      betaScoreEl.textContent = beta;
+      mraScoreEl.textContent = mra;
+      sglt2ScoreEl.textContent = sglt2;
+
+      if (total >= 5) {
+        alertBox.textContent = "👍";
+        alertBox.classList.remove("warning");
+        alertBox.classList.add("success");
+      } else {
+        alertBox.textContent = "HFrEF、HFmrEFでは4剤達成出来なくても5点以上を目指せるとGOOD";
+        alertBox.classList.remove("success");
+        alertBox.classList.add("warning");
+      }
+    });
+
+    // アコーディオン切り替え
+    function toggleInfo(heading) {
+      const info = heading.nextElementSibling;
+      if (info.style.display === "block") {
+        info.style.display = "none";
+      } else {
+        info.style.display = "block";
+      }
+    }
+  </script>
+
+</body>
+</html>
